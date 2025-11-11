@@ -542,7 +542,7 @@
   </div>
 
     <!-- Smoke Particles Canvas -->
-    <canvas id="smokeCanvas" style="position: fixed; left: 50%; top: 0; transform: translateX(-50%); width: 400px; height: 100vh; pointer-events: none; z-index: 5; opacity: 0.3;"></canvas>
+    <canvas id="smokeCanvas" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 400px; height: 100vh; pointer-events: none; z-index: 5; opacity: 0.3;"></canvas>
 
   <div class="timeline-content">
     
@@ -855,7 +855,7 @@
         if (this.currentopacity <= 0) {
           this.currentopacity = 1;
           this.x = smokeCanvasWidth / 2;
-          this.y = 100; // Start from top of cigarette
+          this.y = smokeCanvasHeight / 2 - 130; // Start from ember at top of cigarette
           this.rotation = generateRandomSmoke(0, Math.PI * 2);
           this.radius = 15;
         }
@@ -888,7 +888,7 @@
 
     function addSmokeParticle(ctx) {
       var particle = new SmokeParticle(ctx);
-      particle.setPosition(smokeCanvasWidth / 2, 100);
+      particle.setPosition(smokeCanvasWidth / 2, smokeCanvasHeight / 2 - 130);
       particle.setRotation(generateRandomSmoke(0, Math.PI * 2));
       particle.setVelocity(generateRandomSmoke(-.1, .1), -1.5);
       particle.setImage(smokeImg);
