@@ -541,6 +541,9 @@
     </div>
   </div>
 
+    <!-- Smoke Particles Canvas -->
+    <canvas id="smokeCanvas" style="position: fixed; left: 50%; top: 0; transform: translateX(-50%); width: 400px; height: 100vh; pointer-events: none; z-index: 5; opacity: 0.3;"></canvas>
+
   <div class="timeline-content">
     
     <h1>The Real Drag</h1>
@@ -804,6 +807,142 @@
       }
     }
     
+
+    // Smoke Particle System
+    var smokeParticles = [];
+    var smokeParticleCount = 17;
+    var currentSmokeParticleCount = 0;
+    var maxVelocity = 2;
+    var minVelocity = .5;
+    var growth = .5;
+    var targetFPS = 33;
+    var smokeCanvasWidth;
+    var smokeCanvasHeight;
+
+    // Smoke particle image
+    var smokeImg = new Image();
+    smokeImg.src = "https://i.imgur.com/95DrEMD.png";
+
+    function SmokeParticle(ctx) {
+      this.x = 0;
+      this.y = 0;
+      this.xVelocity = 0;
+      this.yVelocity = 0;
+      this.currentopacity = 1;
+      this.radius = 15;
+      this.rotation = 0;
+      this.context = ctx;
+
+      this.draw = function() {
+        if (this.image) {
+          var offset = this.radius / -2;
+          this.context.save();
+          this.context.translate(this.x, this.y);
+          this.context.globalAlpha = this.currentopacity;
+          this.context.rotate(this.rotation);
+          this.context.drawImage(this.image, offset, offset, this.radius, this.radius);
+          this.context.restore();
+        }
+      };
+
+      this.update = function() {
+        this.x += this.xVelocity;
+        this.y += this.yVelocity;
+        this.rotation += Math.PI / 18;
+        this.currentopacity -= .009;
+        this.radius += growth;
+        
+        if (this.currentopacity <= 0) {
+          this.currentopacity = 1;
+          this.x = smokeCanvasWidth / 2;
+          this.y = 100; // Start from top of cigarette
+          this.rotation = generateRandomSmoke(0, Math.PI * 2);
+          this.radius = 15;
+        }
+      };
+
+      this.setPosition = function(x, y) {
+        this.x = x;
+        this.y = y;
+      };
+
+      this.setVelocity = function(x, y) {
+        this.xVelocity = x;
+        this.yVelocity = y;
+      };
+
+      this.setImage = function(image) {
+        this.image = image;
+      };
+      
+      this.setRotation = function(x) {
+        this.rotation = x;
+      };
+    }
+
+    function generateRandomSmoke(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    var smokeContext;
+
+    function addSmokeParticle(ctx) {
+      var particle = new SmokeParticle(ctx);
+      particle.setPosition(smokeCanvasWidth / 2, 100);
+      particle.setRotation(generateRandomSmoke(0, Math.PI * 2));
+      particle.setVelocity(generateRandomSmoke(-.1, .1), -1.5);
+      particle.setImage(smokeImg);
+      smokeParticles.push(particle);
+      currentSmokeParticleCount++;
+      
+      if (currentSmokeParticleCount < smokeParticleCount) {
+        setTimeout(function() {
+          addSmokeParticle(ctx);
+        }, 200);
+      }
+    }
+
+    function initSmoke() {
+      var canvas = document.getElementById('smokeCanvas');
+      if (!canvas) return;
+      
+      canvas.height = window.innerHeight;
+      canvas.width = 400;
+      smokeCanvasHeight = canvas.height;
+      smokeCanvasWidth = canvas.width;
+      
+      if (canvas.getContext) {
+        smokeContext = canvas.getContext('2d');
+        addSmokeParticle(smokeContext);
+      }
+    }
+
+    function drawSmoke() {
+      if (!smokeContext) return;
+      smokeContext.clearRect(0, 0, smokeCanvasWidth, smokeCanvasHeight);
+      
+      smokeParticles.forEach(function(particle) {
+        particle.draw();
+      });
+    }
+
+    function updateSmoke() {
+      smokeParticles.forEach(function(particle) {
+        particle.update();
+      });
+    }
+
+    // Initialize smoke particles
+    initSmoke();
+
+    // Animate smoke
+    if (smokeContext) {
+      setInterval(function() {
+        updateSmoke();
+        drawSmoke();
+      }, 1000 / targetFPS);
+    }
+
   </script>
 
 </body>
